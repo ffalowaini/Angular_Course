@@ -1,0 +1,4 @@
+input.ng-invalid.ng-touched {
+  border: 2px solid red;
+  border-left: 10px solid red;
+}
