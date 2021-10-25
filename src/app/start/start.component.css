@@ -1,0 +1,28 @@
+html,
+body {
+    height: 100%;
+}
+
+.container {
+    height: 280px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.arrow {
+  height: 30px;
+  width: 30px;
+  border: solid black;
+  border-width: 0 3px 3px 0;
+  display: inline-block;
+  padding: 3px;
+}
+
+.right {
+  margin-top: 20px;
+  margin-left: -5px;
+  transform: rotate(-45deg);
+  /* transform: translateY(-10px);
+  -webkit-transform: rotate(-45deg); */
+}
