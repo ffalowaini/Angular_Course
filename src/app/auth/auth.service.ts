@@ -27,54 +27,90 @@ export class AuthService {
   constructor(private http: HttpClient, private router: Router) { }
 
   signup(email: string, pass: string) {
-    return this.http.post<AuthResponseData>('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=' + environment.firebaseAPIKey,
-      {
-        email: email,
-        password: pass,
-        returnSecureToken: true
-      }
-    ).pipe(catchError(error => {
-      console.log(error);
+    return this.http
+      .post<AuthResponseData>(
+        'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=' +
+          environment.firebaseAPIKey,
+        {
+          email: email,
+          password: pass,
+          returnSecureToken: true,
+        }
+      )
+      .pipe(
+        catchError((error) => {
+          console.log(error);
 
-      if (!error.error || !error.error.error) {
-        return throwError('unknown Error!');
-      }
-      return throwError(error.error.error.message);
+          if (!error.error || !error.error.error) {
+            return throwError('unknown Error!');
+          }
+          return throwError(error.error.error.message);
+        }),
+        tap((resData) => {
+          const expire = new Date(
+            new Date().getTime() + +resData.expiresIn * 1000
+          );
+          const user = new User(
+            resData.email,
+            resData.localId,
+            resData.idToken,
+            expire
+          );
+          const isLogin = JSON.parse(localStorage.getItem('isLogin'));
+          if (isLogin) {
+            this.logout();
+          }
+          console.log('2');
 
-    }), tap(resData => {
-      const expire = new Date(new Date().getTime() + +resData.expiresIn * 1000);
-      const user = new User(resData.email, resData.localId, resData.idToken, expire);
-      this.user.next(user);
-      this.autoLogout(+resData.expiresIn * 1000);
-      localStorage.setItem('userData', JSON.stringify(user));
-
-    }));
+          this.user.next(user);
+          this.autoLogout(+resData.expiresIn * 1000);
+          // localStorage.setItem('userData', JSON.stringify(user));
+          localStorage.setItem('isLogin', JSON.stringify(true));
+        })
+      );
   }
 
   login(email: string, pass: string) {
-    return this.http.post<AuthResponseData>('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=' + environment.firebaseAPIKey,
-      {
-        email: email,
-        password: pass,
-        returnSecureToken: true
-      }).pipe(catchError(error => {
-        console.log(error);
-
-        if (!error.error || !error.error.error) {
-          return throwError('unknown Error!');
+    return this.http
+      .post<AuthResponseData>(
+        'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=' +
+          environment.firebaseAPIKey,
+        {
+          email: email,
+          password: pass,
+          returnSecureToken: true,
         }
-        return throwError(error.error.error.message);
-
-      }
-      ), tap(resData => {
-        const expire = new Date(new Date().getTime() + +resData.expiresIn * 1000);
-        const user = new User(resData.email, resData.localId, resData.idToken, expire);
-        this.user.next(user);
-        this.autoLogout(+resData.expiresIn * 1000);
-        localStorage.setItem('userData', JSON.stringify(user));
-
-      })
       )
+      .pipe(
+        catchError((error) => {
+          console.log(error);
+
+          if (!error.error || !error.error.error) {
+            return throwError('unknown Error!');
+          }
+          return throwError(error.error.error.message);
+        }),
+        tap((resData) => {
+          const expire = new Date(
+            new Date().getTime() + +resData.expiresIn * 1000
+          );
+          const user = new User(
+            resData.email,
+            resData.localId,
+            resData.idToken,
+            expire
+          );
+          const isLogin = JSON.parse(localStorage.getItem('isLogin'));
+          if (isLogin) {
+            console.log('logOut');
+            this.logout();
+          }
+          this.user.next(user);
+          this.autoLogout(+resData.expiresIn * 1000);
+          localStorage.setItem('userData', JSON.stringify(user));
+          localStorage.setItem('isLogin', JSON.stringify(true));
+        })
+      );
   }
 
   autoLogin() {
@@ -88,10 +124,17 @@ export class AuthService {
 
       return;
     }
-    const loadedUser = new User(userData.email, userData.id, userData._token, new Date(userData._tokenExpirationData));
+    const loadedUser = new User(
+      userData.email,
+      userData.id,
+      userData._token,
+      new Date(userData._tokenExpirationData)
+    );
 
     if (userData._token) {
-      const expire = new Date(userData._tokenExpirationData).getTime() - new Date().getTime();
+      const expire =
+        new Date(userData._tokenExpirationData).getTime() -
+        new Date().getTime();
       this.autoLogout(expire);
 
       this.user.next(loadedUser);

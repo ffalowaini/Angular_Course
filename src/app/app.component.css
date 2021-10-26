@@ -2,3 +2,28 @@ input.ng-invalid.ng-touched {
     border: 2px solid red;
     border-left: 10px solid red;
   }
+
+/* .btn-div {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background-color:  blue;
+  border-radius: 100%;
+
+}
+.custom-btn{
+  background-color:  blue;
+  height: 40px;
+  width: 40px;
+  border-radius: 100%;
+  border: 0ch;
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  color: yellow;
+  filter: blur(100px),
+
+
+} */
+
+
